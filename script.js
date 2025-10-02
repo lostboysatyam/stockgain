@@ -74,9 +74,25 @@ function renderGrid(stocks){
       turnoverEl.style.color = "peru";       // Thousand = Bronze-ish
     }
 
-    cube.addEventListener('click', () => {
+    cube.addEventListener('click', (e) => {
       navigator.clipboard.writeText(stock.symbol);
-    });
+    
+      // Create ripple element
+      const ripple = document.createElement("span");
+      ripple.classList.add("ripple");
+    
+      // Position ripple at click point inside the cube
+      const rect = cube.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+    
+      // Append ripple and remove after animation
+      cube.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+  });
+
 
     grid.appendChild(cube);
   });
@@ -106,4 +122,5 @@ fetchDataAndRender();
 
 // Auto refresh every 4 minutes
 setInterval(fetchDataAndRender, REFRESH_INTERVAL);
+
 

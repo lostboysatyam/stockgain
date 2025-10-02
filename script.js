@@ -53,11 +53,26 @@ function renderGrid(stocks){
     cube.style.backgroundColor = getShade(stock.pChange);
     cube.style.color = 'white';
 
+    // Format turnover
+    const turnoverText = humanFormat(stock.totalTradedValue);
+
+    // Create cube HTML
     cube.innerHTML = `
       <div class="symbol">${stock.symbol}</div>
       <div class="pchange">${stock.pChange.toFixed(2)}%</div>
-      <div class="turnover">${humanFormat(stock.totalTradedValue)}</div>
+      <div class="turnover">${turnoverText}</div>
     `;
+
+    // Highlight turnover depending on unit
+    const turnoverEl = cube.querySelector(".turnover");
+    if (turnoverText.endsWith("B")) {
+      turnoverEl.style.color = "gold";       // Billion = Gold
+      turnoverEl.style.fontWeight = "bold";
+    } else if (turnoverText.endsWith("M")) {
+      turnoverEl.style.color = "silver";     // Million = Silver
+    } else if (turnoverText.endsWith("K")) {
+      turnoverEl.style.color = "peru";       // Thousand = Bronze-ish
+    }
 
     cube.addEventListener('click', () => {
       navigator.clipboard.writeText(stock.symbol);
@@ -66,6 +81,7 @@ function renderGrid(stocks){
     grid.appendChild(cube);
   });
 }
+
 
 // Fetch and render
 async function fetchDataAndRender(){
@@ -90,3 +106,4 @@ fetchDataAndRender();
 
 // Auto refresh every 4 minutes
 setInterval(fetchDataAndRender, REFRESH_INTERVAL);
+

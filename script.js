@@ -105,6 +105,12 @@ async function fetchDataAndRender(){
     const res = await fetch(API_URL);
     const data = await res.json();
 
+    if(data.error){
+      console.error("Backend error:", data.error);
+      // Optionally show UI message: "Data unavailable"
+      return;
+    }
+    
     // Validate
     if(data.stocks && data.summary){
       renderSummary(data.summary);
@@ -122,5 +128,6 @@ fetchDataAndRender();
 
 // Auto refresh every 4 minutes
 setInterval(fetchDataAndRender, REFRESH_INTERVAL);
+
 
 

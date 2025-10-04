@@ -108,6 +108,7 @@ async function fetchDataAndRender(){
     if(data.error){
       console.error("Backend error:", data.error);
       // Optionally show UI message: "Data unavailable"
+      alert("Data unavailable. Please try again later!");
       return;
     }
     
@@ -128,6 +129,7 @@ fetchDataAndRender();
 
 // Auto refresh every 4 minutes
 setInterval(fetchDataAndRender, REFRESH_INTERVAL);
+
 
 
 

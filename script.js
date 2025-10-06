@@ -102,8 +102,13 @@ async function fetchDataAndRender() {
       return;
     }
 
-    if (data.stocks && data.summary) {
-      renderSummary(data.summary);
+    if (data.stocks) {
+      const summary = {
+        advances: data.gainers,
+        declines: data.losers,
+        unchanged: data.neutral
+      };
+      renderSummary(summary);
       renderGrid(data.stocks);
     } else {
       console.error("Invalid data format", data);

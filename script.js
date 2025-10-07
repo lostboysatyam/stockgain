@@ -103,14 +103,6 @@ function renderGrid(stocks) {
 
         const entry = window.tokenMap[stock.symbol];
 
-        if (entry && Array.isArray(entry) && entry.length === 2) {
-          const [exchange, token] = entry;
-          const url = `https://kite.zerodha.com/chart/ext/tvc/${exchange}/${stock.symbol}/${token}?theme=dark`;
-          window.open(url, "_blank"); // open chart
-        } else {
-          navigator.clipboard.writeText(stock.symbol); // fallback
-        }
-
         // 💧 Ripple animation
         const ripple = document.createElement("span");
         ripple.classList.add("ripple");
@@ -120,7 +112,17 @@ function renderGrid(stocks) {
         ripple.style.left = `${x}px`;
         ripple.style.top = `${y}px`;
         cube.appendChild(ripple);
+        
         setTimeout(() => ripple.remove(), 350);
+
+        if (entry && Array.isArray(entry) && entry.length === 2) {
+          const [exchange, token] = entry;
+          const url = `https://kite.zerodha.com/chart/ext/tvc/${exchange}/${stock.symbol}/${token}?theme=dark`;
+          setTimeout(() => window.open(url, "_blank"), 200); // delay 200ms
+        } else {
+          navigator.clipboard.writeText(stock.symbol); // fallback
+        }
+        
       });
 
       grid.appendChild(cube);
@@ -161,6 +163,7 @@ fetchDataAndRender();
 
 // Auto refresh every 1.5 minutes
 setInterval(fetchDataAndRender, REFRESH_INTERVAL);
+
 
 
 

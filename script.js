@@ -88,24 +88,40 @@ function renderGrid(stocks){
         turnoverEl.style.color = "peru";       
       }
 
-      cube.addEventListener('click', (e) => {
-        navigator.clipboard.writeText(stock.symbol);
-
+     cube.addEventListener('click', async (e) => {
+        // ✅ Load token_map.json (once per session)
+        if (!window.tokenMap) {
+          try {
+            const res = await fetch("./token_map.json");  // same dir on GitHub Pages
+            window.tokenMap = await res.json();
+          } catch (err) {
+            console.error("Failed to load token_map.json", err);
+            window.tokenMap = {};
+          }
+        }
+      
+        const entry = window.tokenMap[stock.symbol];
+      
+        if (entry && Array.isArray(entry) && entry.length === 2) {
+          const [exchange, token] = entry;
+          const url = `https://kite.zerodha.com/chart/ext/tvc/${exchange}/${stock.symbol}/${token}?theme=dark`;
+          window.open(url, "_blank"); // open chart
+        } else {
+          navigator.clipboard.writeText(stock.symbol); // fallback
+        }
+      
+        // 💧 Ripple animation
         const ripple = document.createElement("span");
         ripple.classList.add("ripple");
-
         const rect = cube.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         ripple.style.left = `${x}px`;
         ripple.style.top = `${y}px`;
-
         cube.appendChild(ripple);
         setTimeout(() => ripple.remove(), 350);
       });
 
-      grid.appendChild(cube);
-    });
 
     // Fade in after update
     grid.style.opacity = 1;
@@ -142,4 +158,5 @@ fetchDataAndRender();
 
 // Auto refresh every 1.5 minutes
 setInterval(fetchDataAndRender, REFRESH_INTERVAL);
+
 

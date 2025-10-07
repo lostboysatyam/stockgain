@@ -1,4 +1,4 @@
-const API_URL = "https://nse-backend-utot.onrender.com//top-stocks";
+const API_URL = "https://nse-backend-utot.onrender.com/top-stocks"; // ✅ Fixed double slash
 const REFRESH_INTERVAL = 1.5 * 60 * 1000; // 1.5 minutes
 
 // Green/Red shades
@@ -44,71 +44,78 @@ function renderSummary(summary){
 // Render grid
 function renderGrid(stocks){
   const grid = document.getElementById("stockGrid");
-  grid.innerHTML = ""; // clear old
 
-  stocks.forEach(stock => {
-    const cube = document.createElement("div");
-    cube.className = "cube";
+  // Fade out old grid for smooth transition
+  grid.style.opacity = 0;
 
-    cube.style.backgroundColor = getShade(stock.pChange);
-    cube.style.color = 'white';
+  setTimeout(() => {
+    grid.innerHTML = ""; // clear old
 
-    // Format turnover
-    const turnoverText = humanFormat(stock.totalTradedValue);
+    stocks.forEach(stock => {
+      const cube = document.createElement("div");
+      cube.className = "cube";
 
-    // Create cube HTML
-    cube.innerHTML = `
-      <div class="symbol">${stock.symbol}</div>
-      <div class="pchange">${stock.pChange.toFixed(2)}%</div>
-      <div class="turnover">${turnoverText}</div>
-    `;
+      cube.style.backgroundColor = getShade(stock.pChange);
+      cube.style.color = 'white';
 
-    // Highlight turnover depending on unit
-    const turnoverEl = cube.querySelector(".turnover");
-    if (turnoverText.endsWith("B")) {
-      turnoverEl.style.color = "gold";       // Billion = Gold
-      turnoverEl.style.fontWeight = "bold";
-    } else if (turnoverText.endsWith("M")) {
-      turnoverEl.style.color = "silver";     // Million = Silver
-    } else if (turnoverText.endsWith("K")) {
-      turnoverEl.style.color = "peru";       // Thousand = Bronze-ish
-    }
+      // Format turnover
+      const turnoverText = humanFormat(stock.totalTradedValue);
 
-    cube.addEventListener('click', (e) => {
-      navigator.clipboard.writeText(stock.symbol);
-    
-      // Create ripple element
-      const ripple = document.createElement("span");
-      ripple.classList.add("ripple");
-    
-      // Position ripple at click point inside the cube
-      const rect = cube.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      ripple.style.left = `${x}px`;
-      ripple.style.top = `${y}px`;
-    
-      // Append ripple and remove after animation
-      cube.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 600);
-  });
+      // Create cube HTML
+      cube.innerHTML = `
+        <div class="symbol">${stock.symbol}</div>
+        <div class="pchange">${stock.pChange.toFixed(2)}%</div>
+        <div class="turnover">${turnoverText}</div>
+      `;
 
+      // Highlight turnover depending on unit
+      const turnoverEl = cube.querySelector(".turnover");
+      if (turnoverText.endsWith("B")) {
+        turnoverEl.style.color = "gold";       // Billion = Gold
+        turnoverEl.style.fontWeight = "bold";
+      } else if (turnoverText.endsWith("M")) {
+        turnoverEl.style.color = "silver";     // Million = Silver
+      } else if (turnoverText.endsWith("K")) {
+        turnoverEl.style.color = "peru";       // Thousand = Bronze-ish
+      }
 
-    grid.appendChild(cube);
-  });
+      cube.addEventListener('click', (e) => {
+        navigator.clipboard.writeText(stock.symbol);
+
+        // Create ripple element
+        const ripple = document.createElement("span");
+        ripple.classList.add("ripple");
+
+        // Position ripple at click point inside the cube
+        const rect = cube.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+
+        // Append ripple and remove after animation
+        cube.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+      });
+
+      grid.appendChild(cube);
+    });
+
+    // Fade in after update
+    grid.style.opacity = 1;
+  }, 200); // fade out duration
 }
-
 
 // Fetch and render
 async function fetchDataAndRender(){
   try {
     const res = await fetch(API_URL);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
     if(data.error){
       console.error("Backend error:", data.error);
-      // Optionally show UI message: "Data unavailable"
-      alert("Data unavailable. Please try again later!");
+      document.getElementById("summary").innerHTML = "<span style='color:red'>⚠️ Data unavailable</span>";
       return;
     }
     
@@ -121,6 +128,7 @@ async function fetchDataAndRender(){
     }
   } catch(err){
     console.error("Failed to fetch:", err);
+    document.getElementById("summary").innerHTML = "<span style='color:red'>⚠️ Data fetch failed</span>";
   }
 }
 

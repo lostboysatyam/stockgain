@@ -31,6 +31,15 @@ function getShade(pChange){
   }
 }
 
+// Calculate readable text color based on background
+function getContrastColor(hex) {
+  const r = parseInt(hex.substr(1,2),16);
+  const g = parseInt(hex.substr(3,2),16);
+  const b = parseInt(hex.substr(5,2),16);
+  const yiq = ((r*299)+(g*587)+(b*114))/1000;
+  return (yiq >= 128) ? "black" : "white";
+}
+
 // Render summary
 function renderSummary(summary){
   const summaryDiv = document.getElementById("summary");
@@ -55,45 +64,42 @@ function renderGrid(stocks){
       const cube = document.createElement("div");
       cube.className = "cube";
 
-      cube.style.backgroundColor = getShade(stock.pChange);
-      cube.style.color = 'white';
+      const bgColor = getShade(stock.pChange);
+      cube.style.backgroundColor = bgColor;
 
-      // Format turnover
+      // ✅ Dynamic text color for readability
+      cube.style.color = getContrastColor(bgColor);
+
       const turnoverText = humanFormat(stock.totalTradedValue);
 
-      // Create cube HTML
       cube.innerHTML = `
         <div class="symbol">${stock.symbol}</div>
         <div class="pchange">${stock.pChange.toFixed(2)}%</div>
         <div class="turnover">${turnoverText}</div>
       `;
 
-      // Highlight turnover depending on unit
       const turnoverEl = cube.querySelector(".turnover");
       if (turnoverText.endsWith("B")) {
-        turnoverEl.style.color = "gold";       // Billion = Gold
+        turnoverEl.style.color = "gold";       
         turnoverEl.style.fontWeight = "bold";
       } else if (turnoverText.endsWith("M")) {
-        turnoverEl.style.color = "silver";     // Million = Silver
+        turnoverEl.style.color = "silver";     
       } else if (turnoverText.endsWith("K")) {
-        turnoverEl.style.color = "peru";       // Thousand = Bronze-ish
+        turnoverEl.style.color = "peru";       
       }
 
       cube.addEventListener('click', (e) => {
         navigator.clipboard.writeText(stock.symbol);
 
-        // Create ripple element
         const ripple = document.createElement("span");
         ripple.classList.add("ripple");
 
-        // Position ripple at click point inside the cube
         const rect = cube.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         ripple.style.left = `${x}px`;
         ripple.style.top = `${y}px`;
 
-        // Append ripple and remove after animation
         cube.appendChild(ripple);
         setTimeout(() => ripple.remove(), 600);
       });
@@ -103,7 +109,7 @@ function renderGrid(stocks){
 
     // Fade in after update
     grid.style.opacity = 1;
-  }, 200); // fade out duration
+  }, 200); 
 }
 
 // Fetch and render
@@ -119,7 +125,6 @@ async function fetchDataAndRender(){
       return;
     }
     
-    // Validate
     if(data.stocks && data.summary){
       renderSummary(data.summary);
       renderGrid(data.stocks);

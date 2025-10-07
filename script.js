@@ -101,7 +101,7 @@ function renderGrid(stocks){
         ripple.style.top = `${y}px`;
 
         cube.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 600);
+        setTimeout(() => ripple.remove(), 350);
       });
 
       grid.appendChild(cube);
@@ -142,3 +142,4 @@ fetchDataAndRender();
 
 // Auto refresh every 1.5 minutes
 setInterval(fetchDataAndRender, REFRESH_INTERVAL);
+

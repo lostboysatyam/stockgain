@@ -51,7 +51,7 @@ function renderSummary(summary){
 }
 
 // Render grid
-function renderGrid(stocks){
+function renderGrid(stocks) {
   const grid = document.getElementById("stockGrid");
 
   // Fade out old grid for smooth transition
@@ -80,28 +80,29 @@ function renderGrid(stocks){
 
       const turnoverEl = cube.querySelector(".turnover");
       if (turnoverText.endsWith("B")) {
-        turnoverEl.style.color = "gold";       
+        turnoverEl.style.color = "gold";
         turnoverEl.style.fontWeight = "bold";
       } else if (turnoverText.endsWith("M")) {
-        turnoverEl.style.color = "silver";     
+        turnoverEl.style.color = "silver";
       } else if (turnoverText.endsWith("K")) {
-        turnoverEl.style.color = "peru";       
+        turnoverEl.style.color = "peru";
       }
 
-     cube.addEventListener('click', async (e) => {
-        // ✅ Load token_map.json (once per session)
+      // ✅ Click handler with token_map.json logic
+      cube.addEventListener('click', async (e) => {
+        // Load token_map.json only once
         if (!window.tokenMap) {
           try {
-            const res = await fetch("./token_map.json");  // same dir on GitHub Pages
+            const res = await fetch("./token_map.json"); // same dir
             window.tokenMap = await res.json();
           } catch (err) {
             console.error("Failed to load token_map.json", err);
             window.tokenMap = {};
           }
         }
-      
+
         const entry = window.tokenMap[stock.symbol];
-      
+
         if (entry && Array.isArray(entry) && entry.length === 2) {
           const [exchange, token] = entry;
           const url = `https://kite.zerodha.com/chart/ext/tvc/${exchange}/${stock.symbol}/${token}?theme=dark`;
@@ -109,7 +110,7 @@ function renderGrid(stocks){
         } else {
           navigator.clipboard.writeText(stock.symbol); // fallback
         }
-      
+
         // 💧 Ripple animation
         const ripple = document.createElement("span");
         ripple.classList.add("ripple");
@@ -122,10 +123,12 @@ function renderGrid(stocks){
         setTimeout(() => ripple.remove(), 350);
       });
 
+      grid.appendChild(cube);
+    });
 
     // Fade in after update
     grid.style.opacity = 1;
-  }, 200); 
+  }, 200);
 }
 
 // Fetch and render
@@ -158,5 +161,6 @@ fetchDataAndRender();
 
 // Auto refresh every 1.5 minutes
 setInterval(fetchDataAndRender, REFRESH_INTERVAL);
+
 
 
